@@ -16,6 +16,7 @@ Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCoun
 {
 	mHelp = new HelpComponent(this);
 	mBackgroundOverlay = new ImageComponent(this);
+	onWake();
 }
 
 Window::~Window()
@@ -225,7 +226,7 @@ void Window::update(int deltaTime)
 
 	if(peekGui())
 		peekGui()->update(deltaTime);
-	
+
 	// Update the screensaver
 	if (mScreenSaver)
 		mScreenSaver->update(deltaTime);
@@ -261,9 +262,10 @@ void Window::render()
 	}
 
 	unsigned int screensaverTime = (unsigned int)Settings::getInstance()->getInt("ScreenSaverTime");
-	if(mTimeSinceLastInput >= screensaverTime && screensaverTime != 0)
+	bool enableScreenSaver = mTimeSinceLastInput >= screensaverTime && screensaverTime != 0;
+	if(enableScreenSaver)
 		startScreenSaver();
-	
+
 	// Always call the screensaver render function regardless of whether the screensaver is active
 	// or not because it may perform a fade on transition
 	renderScreenSaver();
@@ -272,17 +274,12 @@ void Window::render()
 	{
 		mInfoPopup->render(transform);
 	}
-	
-	if(mTimeSinceLastInput >= screensaverTime && screensaverTime != 0)
+
+	unsigned int systemSleepTime = (unsigned int)Settings::getInstance()->getInt("SystemSleepTime");
+	if(!isProcessing() && mAllowSleep && systemSleepTime != 0 && mTimeSinceLastInput >= systemSleepTime)
 	{
-		if (!isProcessing() && mAllowSleep && (!mScreenSaver || mScreenSaver->allowSleep()))
-		{
-			// go to sleep
-			if (mSleeping == false) {
-				mSleeping = true;
-				onSleep();
-			}
-		}
+		mSleeping = true;
+		onSleep();
 	}
 }
 
@@ -404,7 +401,19 @@ void Window::setHelpPrompts(const std::vector<HelpPrompt>& prompts, const HelpSt
 
 void Window::onSleep()
 {
-	Scripting::fireEvent("sleep");
+	if (Settings::getInstance()->getBool("Windowed")) {
+		LOG(LogInfo) << "running windowed. No further onSleep() processing.";
+		return;
+	}
+
+	int gotErrors = Scripting::fireEvent("sleep");
+
+	if (gotErrors == 0 && mScreenSaver && mRenderScreenSaver)
+	{
+		mScreenSaver->stopScreenSaver();
+		mRenderScreenSaver = false;
+		mScreenSaver->resetCounts();
+	}
 }
 
 void Window::onWake()
@@ -419,33 +428,35 @@ bool Window::isProcessing()
 
 void Window::startScreenSaver()
  {
- 	if (mScreenSaver && !mRenderScreenSaver)
- 	{
- 		// Tell the GUI components the screensaver is starting
- 		for(auto i = mGuiStack.cbegin(); i != mGuiStack.cend(); i++)
- 			(*i)->onScreenSaverActivate();
+	if (mScreenSaver && !mRenderScreenSaver)
+	{
+		// Tell the GUI components the screensaver is starting
+		for(auto i = mGuiStack.cbegin(); i != mGuiStack.cend(); i++)
+			(*i)->onScreenSaverActivate();
 
- 		mScreenSaver->startScreenSaver();
- 		mRenderScreenSaver = true;
- 	}
+		mScreenSaver->startScreenSaver();
+		mRenderScreenSaver = true;
+		Scripting::fireEvent("screensaver-start");
+	}
  }
 
  void Window::cancelScreenSaver()
  {
- 	if (mScreenSaver && mRenderScreenSaver)
- 	{
- 		mScreenSaver->stopScreenSaver();
- 		mRenderScreenSaver = false;
- 		mScreenSaver->resetCounts();
+	if (mScreenSaver && mRenderScreenSaver)
+	{
+		mScreenSaver->stopScreenSaver();
+		mRenderScreenSaver = false;
+		mScreenSaver->resetCounts();
+		Scripting::fireEvent("screensaver-stop");
 
- 		// Tell the GUI components the screensaver has stopped
- 		for(auto i = mGuiStack.cbegin(); i != mGuiStack.cend(); i++)
- 			(*i)->onScreenSaverDeactivate();
- 	}
+		// Tell the GUI components the screensaver has stopped
+		for(auto i = mGuiStack.cbegin(); i != mGuiStack.cend(); i++)
+			(*i)->onScreenSaverDeactivate();
+	}
  }
 
  void Window::renderScreenSaver()
  {
- 	if (mScreenSaver)
- 		mScreenSaver->renderScreenSaver();
+	if (mScreenSaver)
+		mScreenSaver->renderScreenSaver();
  }
