@@ -9,6 +9,7 @@
 #include "SystemData.h"
 #include <SDL_timer.h>
 
+
 ISimpleGameListView::ISimpleGameListView(Window* window, FileData* root) : IGameListView(window, root),
 	mHeaderText(window), mHeaderImage(window), mBackground(window)
 {
@@ -80,7 +81,7 @@ void ISimpleGameListView::onFileChanged(FileData* /*file*/, FileChangeType /*cha
 
 bool ISimpleGameListView::input(InputConfig* config, Input input)
 {
-	if(input.value != 0)
+	if(input.value != 0 && !mHotkeyHeld)
 	{
 		if(config->isMappedTo("a", input))
 		{
@@ -172,7 +173,6 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 	}
 	return IGameListView::input(config, input);
 }
-
 
 int ISimpleGameListView::getPressCountInDuration() {
 	Uint32 now = SDL_GetTicks();

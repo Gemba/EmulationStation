@@ -16,9 +16,11 @@ public:
 
 	void update(int deltaTime) override;
 	void render(const Transform4x4f& parentTrans) override;
+	bool input(InputConfig* config, Input input) override;
 
 private:
 	Vector2f getContentSize();
+	void restoreAutoscroll(const int delay);
 
 	Vector2f mScrollPos;
 	Vector2f mScrollDir;
@@ -27,6 +29,8 @@ private:
 	int mAutoScrollAccumulator;
 	bool mAtEnd;
 	int mAutoScrollResetAccumulator;
+	bool mManualScroll = false;
+	int mPristineAutoScrollDelay; // holds value before any manual scroll
 };
 
 #endif // ES_CORE_COMPONENTS_SCROLLABLE_CONTAINER_H

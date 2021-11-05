@@ -295,7 +295,7 @@ bool TextListComponent<T>::input(InputConfig* config, Input input)
 	bool isSingleStep = config->isMappedLike("down", input) || config->isMappedLike("up", input);
 	bool isPageStep = config->isMappedLike("rightshoulder", input) || config->isMappedLike("leftshoulder", input);
 
-	if(size() > 0 && (isSingleStep || isPageStep))
+	if(size() > 0 && (isSingleStep || isPageStep) && !TextListComponent<T>::mHotkeyHeld)
 	{
 		if(input.value != 0)
 		{

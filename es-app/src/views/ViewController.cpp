@@ -422,17 +422,23 @@ bool ViewController::input(InputConfig* config, Input input)
 	if(mLockInput)
 		return true;
 
-	// open menu
-	if(!(UIModeController::getInstance()->isUIModeKid() && Settings::getInstance()->getBool("DisableKidStartMenu")) && config->isMappedTo("start", input) && input.value != 0)
+	if(config->isMappedTo("hotkey", input))
+		mHotkeyHeld = (input.value != 0);
+
+	if(!mHotkeyHeld)
 	{
 		// open menu
-		mWindow->pushGui(new GuiMenu(mWindow));
-		return true;
-	}
+		if(!(UIModeController::getInstance()->isUIModeKid() && Settings::getInstance()->getBool("DisableKidStartMenu")) && config->isMappedTo("start", input) && input.value != 0)
+		{
+			// open menu
+			mWindow->pushGui(new GuiMenu(mWindow));
+			return true;
+		}
 
-	if(UIModeController::getInstance()->listen(config, input))  // check if UI mode has changed due to passphrase completion
-	{
-		return true;
+		if(UIModeController::getInstance()->listen(config, input))  // check if UI mode has changed due to passphrase completion
+		{
+			return true;
+		}
 	}
 
 	if(mCurrentView)

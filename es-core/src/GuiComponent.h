@@ -137,6 +137,7 @@ public:
 	// Returns true if the component is busy doing background processing (e.g. HTTP downloads)
 	bool isProcessing() const;
 
+
 protected:
 	void renderChildren(const Transform4x4f& transform) const;
 	void updateSelf(int deltaTime); // updates animations
@@ -161,6 +162,7 @@ protected:
 
 	bool mIsProcessing;
 	bool mVisible;
+	bool mHotkeyHeld = false;
 
 public:
 	const static unsigned char MAX_ANIMATIONS = 4;

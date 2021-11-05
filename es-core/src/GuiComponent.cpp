@@ -31,6 +31,11 @@ GuiComponent::~GuiComponent()
 
 bool GuiComponent::input(InputConfig* config, Input input)
 {
+	if (config->isMappedTo("hotkey", input))
+	{
+		mHotkeyHeld = (input.value == 1);
+	}
+
 	for(unsigned int i = 0; i < getChildCount(); i++)
 	{
 		if(getChild(i)->input(config, input))
@@ -117,7 +122,7 @@ Vector2f GuiComponent::getSize() const
 void GuiComponent::setSize(float w, float h)
 {
 	mSize = Vector2f(w, h);
-    onSizeChanged();
+	onSizeChanged();
 }
 
 float GuiComponent::getRotation() const
@@ -172,7 +177,7 @@ void GuiComponent::setVisible(bool visible)
 Vector2f GuiComponent::getCenter() const
 {
 	return Vector2f(mPosition.x() - (getSize().x() * mOrigin.x()) + getSize().x() / 2,
-	                mPosition.y() - (getSize().y() * mOrigin.y()) + getSize().y() / 2);
+			mPosition.y() - (getSize().y() * mOrigin.y()) + getSize().y() / 2);
 }
 
 //Children stuff.
