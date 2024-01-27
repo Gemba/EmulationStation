@@ -100,7 +100,7 @@ void GuiCollectionSystemsOptions::initializeMenu()
 	}
 
 	mMenu.addWithLabel("ADD/REMOVE GAMES WHILE SCREENSAVER TO", defaultScreenSaverCollection);
-	
+
 	if(CollectionSystemManager::get()->isEditing())
 	{
 		row.elements.clear();
@@ -198,7 +198,7 @@ void GuiCollectionSystemsOptions::applySettings()
 	bool prevBundle = Settings::getInstance()->getBool("UseCustomCollectionsSystem");
 	bool prevShow = Settings::getInstance()->getBool("CollectionShowSystemInfo");
 	bool outShow = toggleSystemNameInCollections->getState();
-	
+
 	// need to check if collection is enabled
 	std::string enabledCollectionName = "";
 	std::string selectedCollection = defaultScreenSaverCollection->getSelected();
@@ -219,7 +219,7 @@ void GuiCollectionSystemsOptions::applySettings()
 
 	bool needRefreshCollectionSettings = prevAuto != outAuto || prevCustom != outCustom || outSort != prevSort || outBundle != prevBundle
 		|| prevShow != outShow;
-	
+
 	if (needRefreshCollectionSettings)
 	{
 		updateSettings(outAuto, outCustom);
@@ -240,7 +240,7 @@ void GuiCollectionSystemsOptions::updateSettings(std::string newAutoSettings, st
 	Settings::getInstance()->setBool("CollectionShowSystemInfo", toggleSystemNameInCollections->getState());
 
 	Settings::getInstance()->saveFile();
-	
+
 	CollectionSystemManager::get()->loadEnabledListFromSettings();
 	CollectionSystemManager::get()->updateSystemsList();
 	ViewController::get()->goToStart();
