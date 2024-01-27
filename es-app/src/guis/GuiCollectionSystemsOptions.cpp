@@ -86,11 +86,10 @@ void GuiCollectionSystemsOptions::initializeMenu()
 
 
 	// Add option to select default collection for screensaver
-	defaultScreenSaverCollection = std::make_shared< OptionListComponent<std::string> >(mWindow, "DEFAULT COLLECTION TO ADD SCREENSAVER GAMES TO", false);
-	
+	defaultScreenSaverCollection = std::make_shared< OptionListComponent<std::string> >(mWindow, "ADD/REMOVE GAMES WHILE SCREENSAVER TO", false);
 	// Add default option
 	std::string defaultScreenSaverCollectionName = Settings::getInstance()->getString("DefaultScreenSaverCollection");
-	defaultScreenSaverCollection->add("<DEFAULT>", "", defaultScreenSaverCollectionName == "");
+	defaultScreenSaverCollection->add("Favorites", "", defaultScreenSaverCollectionName == "");
 
 	std::map<std::string, CollectionSystemData> customSystems = CollectionSystemManager::get()->getCustomCollectionSystems();
 	// add all enabled Custom Systems
@@ -100,7 +99,7 @@ void GuiCollectionSystemsOptions::initializeMenu()
 			defaultScreenSaverCollection->add(it->second.decl.longName, it->second.decl.name, defaultScreenSaverCollectionName == it->second.decl.name);
 	}
 
-	mMenu.addWithLabel("DEFAULT COLLECTION TO ADD SCREENSAVER GAMES TO", defaultScreenSaverCollection);
+	mMenu.addWithLabel("ADD/REMOVE GAMES WHILE SCREENSAVER TO", defaultScreenSaverCollection);
 	
 	if(CollectionSystemManager::get()->isEditing())
 	{
