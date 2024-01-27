@@ -89,14 +89,15 @@ void GuiCollectionSystemsOptions::initializeMenu()
 	defaultScreenSaverCollection = std::make_shared< OptionListComponent<std::string> >(mWindow, "DEFAULT COLLECTION TO ADD SCREENSAVER GAMES TO", false);
 	
 	// Add default option
-	defaultScreenSaverCollection->add("<DEFAULT>", "", Settings::getInstance()->getString("DefaultScreenSaverCollection") == "");
+	std::string defaultScreenSaverCollectionName = Settings::getInstance()->getString("DefaultScreenSaverCollection");
+	defaultScreenSaverCollection->add("<DEFAULT>", "", defaultScreenSaverCollectionName == "");
 
 	std::map<std::string, CollectionSystemData> customSystems = CollectionSystemManager::get()->getCustomCollectionSystems();
 	// add all enabled Custom Systems
 	for(std::map<std::string, CollectionSystemData>::const_iterator it = customSystems.cbegin() ; it != customSystems.cend() ; it++ )
 	{
 		if (it->second.isEnabled)
-			defaultScreenSaverCollection->add(it->second.decl.longName, it->second.decl.name, Settings::getInstance()->getString("DefaultScreenSaverCollection") == it->second.decl.name);
+			defaultScreenSaverCollection->add(it->second.decl.longName, it->second.decl.name, defaultScreenSaverCollectionName == it->second.decl.name);
 	}
 
 	mMenu.addWithLabel("DEFAULT COLLECTION TO ADD SCREENSAVER GAMES TO", defaultScreenSaverCollection);
@@ -198,24 +199,25 @@ void GuiCollectionSystemsOptions::applySettings()
 	bool prevBundle = Settings::getInstance()->getBool("UseCustomCollectionsSystem");
 	bool prevShow = Settings::getInstance()->getBool("CollectionShowSystemInfo");
 	bool outShow = toggleSystemNameInCollections->getState();
+	
 	// need to check if collection is enabled
 	std::string enabledCollectionName = "";
-	if (defaultScreenSaverCollection->getSelectedObjects().size() != 0)
-	{
-		std::string selectedCollection = defaultScreenSaverCollection->getSelectedObjects().at(0);
-		if (selectedCollection != "") {
-			std::vector<std::string> enabledCollections = customOptionList->getSelectedObjects();
-			for(auto nameIt = enabledCollections.begin(); nameIt != enabledCollections.end(); nameIt++) {
-				if(*nameIt == selectedCollection) {
-					enabledCollectionName = selectedCollection;
-					break;
-				}
+	std::string selectedCollection = defaultScreenSaverCollection->getSelected();
+	if (selectedCollection != "") {
+		// user may have disabled custom collection in this menu but
+		// DefaultScreenSaverCollection may still point to it, validate it:
+		std::vector<std::string> enabledCollections = customOptionList->getSelectedObjects();
+		for(auto nameIt = enabledCollections.begin(); nameIt != enabledCollections.end(); nameIt++) {
+			if(*nameIt == selectedCollection) {
+				enabledCollectionName = selectedCollection;
+				break;
 			}
 		}
 	}
 
 	Settings::getInstance()->setString("DefaultScreenSaverCollection", enabledCollectionName);
 	Settings::getInstance()->setBool("DoublePressRemovesFromFavs", doublePressToRemoveFavs->getState());
+
 	bool needRefreshCollectionSettings = prevAuto != outAuto || prevCustom != outCustom || outSort != prevSort || outBundle != prevBundle
 		|| prevShow != outShow;
 	
@@ -227,8 +229,6 @@ void GuiCollectionSystemsOptions::applySettings()
 	{
 		Settings::getInstance()->saveFile();
 	}
-	
-	Settings::getInstance()->saveFile();
 	delete this;
 }
 
@@ -239,7 +239,9 @@ void GuiCollectionSystemsOptions::updateSettings(std::string newAutoSettings, st
 	Settings::getInstance()->setBool("SortAllSystems", sortAllSystemsSwitch->getState());
 	Settings::getInstance()->setBool("UseCustomCollectionsSystem", bundleCustomCollections->getState());
 	Settings::getInstance()->setBool("CollectionShowSystemInfo", toggleSystemNameInCollections->getState());
+
 	Settings::getInstance()->saveFile();
+	
 	CollectionSystemManager::get()->loadEnabledListFromSettings();
 	CollectionSystemManager::get()->updateSystemsList();
 	ViewController::get()->goToStart();
