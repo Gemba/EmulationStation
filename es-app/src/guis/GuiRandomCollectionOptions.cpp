@@ -1,7 +1,7 @@
 #include "guis/GuiRandomCollectionOptions.h"
 
 #include "components/OptionListComponent.h"
-#include "components/SwitchComponent.h"
+#include "components/SliderComponent.h"
 #include "guis/GuiSettings.h"
 #include "guis/GuiTextEditPopup.h"
 #include "utils/StringUtil.h"
@@ -147,11 +147,8 @@ void GuiRandomCollectionOptions::selectEntries(std::map<std::string, CollectionS
 
 			initValues[label] = selectedValue;
 
-			std::shared_ptr<NumberList> colItems = std::make_shared<NumberList>(mWindow, label, false);
-			for (int i = 0; i <= RANDOM_SYSTEM_MAX; i++)
-			{
-				colItems->add(std::to_string(i), i, i == selectedValue);
-			}
+			auto colItems = std::make_shared<SliderComponent>(mWindow, 0.f, float(RANDOM_SYSTEM_MAX), 1.f, " " /* space as 'unit' to have amount rendered */);
+			colItems->setValue((float)selectedValue);
 			row.addElement(std::make_shared<TextComponent>(mWindow, Utils::String::toUpper(label), Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 			row.addElement(colItems, false);
 
@@ -185,7 +182,7 @@ void GuiRandomCollectionOptions::applyGroupSettings(std::string settingsLabel, c
 	std::map<std::string,std::any> currentValues;
 	for (auto it = results->begin(); it != results->end(); ++it)
 	{
-		currentValues[(*it).name] = (*it).gamesSelection->getSelected();
+		currentValues[(*it).name] = int((*it).gamesSelection->getValue());
 	}
 	if (!equal(currentValues, initialValues))
 	{

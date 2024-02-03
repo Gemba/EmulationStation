@@ -3,6 +3,7 @@
 #define ES_APP_GUIS_GUI_RANDOM_COLLECTION_OPTIONS_H
 
 #include "components/MenuComponent.h"
+#include "components/SliderComponent.h"
 
 #include <any>
 
@@ -17,7 +18,7 @@ typedef OptionListComponent<int> NumberList;
 struct SystemGames
 {
 	std::string name;
-	std::shared_ptr<NumberList> gamesSelection;
+	std::shared_ptr<SliderComponent> gamesSelection;
 };
 
 class GuiRandomCollectionOptions : public GuiComponent
