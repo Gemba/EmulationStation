@@ -144,7 +144,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 	{
 		row.elements.clear();
 		std::string lblTxt = std::string("EDIT THIS ");
-		lblTxt += std::string((file->getType() == FOLDER ? "FOLDER" : "GAME"));
+		lblTxt += std::string(file->metadata.getType() == GAME_METADATA ? "GAME" : "FOLDER");
 		lblTxt += std::string("'S METADATA");
 		row.addElement(std::make_shared<TextComponent>(mWindow, lblTxt, Font::get(FONT_SIZE_MEDIUM), 0x777777FF), true);
 		row.addElement(makeArrow(mWindow), false);

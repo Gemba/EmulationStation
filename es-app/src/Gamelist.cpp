@@ -48,12 +48,14 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 			if(found)
 				return treeNode;
 
+			// not found
 			if(type == FOLDER)
 			{
-				LOG(LogWarning) << "gameList: folder doesn't already exist, won't create";
+				LOG(LogWarning) << "gameList: folder '" << pathSegment << "' doesn't already exist, won't create";
 				return NULL;
 			}
 
+			// not found and type == GAME
 			FileData* file = new FileData(type, path, system->getSystemEnvData(), system);
 
 			// skipping arcade assets from gamelist
@@ -78,7 +80,7 @@ FileData* findOrCreateFile(SystemData* system, const std::string& path, FileType
 			// create folder filedata object
 			std::string absPath = Utils::FileSystem::resolveRelativePath(treeNode->getPath() + "/" + pathSegment, systemPath, false, true);
 			FileData* folder = new FileData(FOLDER, absPath, system->getSystemEnvData(), system);
-			LOG(LogDebug) << "folder not found as FileData, adding: " << folder->getPath();
+			LOG(LogDebug) << "gamelist: folder not found as FileData, adding: " << folder->getPath();
 
 			treeNode->addChild(folder);
 			treeNode = folder;
